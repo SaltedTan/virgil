@@ -1,0 +1,42 @@
+// Reads space-separated integers from a file, sorts them, and prints them.
+
+def main(args: Array<string>) {
+    def fileName = "numbers.txt";
+
+    var inputArray: Array<byte> = System.fileLoad(fileName);  // load a whole file
+    if (inputArray != null) {
+        System.puts(fileName);
+        System.puts(" successfully loaded.\n");
+    } else {
+        System.puts(fileName);
+        System.puts(" could not be loaded.\n");
+    }
+
+    var vec = Vector<int>.new();
+
+    // use TextReader to readToken for a certain number of bytes, determined by using star_rel to peek how many bytes are digits (Char.isDecimal)
+    // image field of the Token read is a string, which can be put into NumberParser since a string is just Array<byte>.
+
+    def tr = TextReader.new(null, inputArray);
+    var np: NumberParser;
+
+    while (tr.peekRel(1) != '\x00') {
+        var wsPos: int = tr.star_rel(0, Chars.isDecimal);
+        var length: int = wsPos - tr.pos;
+        var t: Token = tr.readToken(length);
+        np = NumberParser.new(t.image);
+        np.parse();
+        var i = NumberParserValue.Int.!(np.val).v;
+        vec.put(int.!(i));
+    }
+
+    var numbers = vec.extract();
+
+    var sorted = Arrays.sort(numbers, 0, numbers.length, int.<);
+
+    System.puts("Sorted numbers:\n");
+    for (num in sorted) {
+        System.puti(num);
+        System.ln();
+    }
+}
