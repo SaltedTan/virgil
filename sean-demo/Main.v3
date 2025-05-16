@@ -1,5 +1,9 @@
 // Reads space-separated integers from a file, sorts them, and prints them.
 
+def isNonDecimal(c: byte) -> bool {
+    return !Chars.isDecimal(c);
+}
+
 def main(args: Array<string>) {
     def fileName = "numbers.txt";
 
@@ -10,6 +14,7 @@ def main(args: Array<string>) {
     } else {
         System.puts(fileName);
         System.puts(" could not be loaded.\n");
+        return;
     }
 
     var vec = Vector<int>.new();
@@ -20,10 +25,12 @@ def main(args: Array<string>) {
     def tr = TextReader.new(null, inputArray);
     var np: NumberParser;
 
-    while (tr.peekRel(1) != '\x00') {
-        var wsPos: int = tr.star_rel(0, Chars.isDecimal);
-        var length: int = wsPos - tr.pos;
-        var t: Token = tr.readToken(length);
+    while (tr.pos < tr.limit) {
+        var wsPos = tr.star_rel(0, isNonDecimal);
+        tr.advance(wsPos - tr.pos);
+        var wePos = tr.star_rel(0, Chars.isDecimal);
+        if (wePos == tr.pos) break;
+        var t = tr.readToken(wePos - tr.pos);
         np = NumberParser.new(t.image);
         np.parse();
         var i = NumberParserValue.Int.!(np.val).v;
